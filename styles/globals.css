@@ -1,0 +1,59 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    color: white;
+    background: black;
+  }
+}
+
+
+
+.none {
+  background-color: #f1f1f1;
+}
+.win {
+  background-color: green;
+}
+.lose {
+  background-color: red;
+}
+.flex {
+  display: flex;
+  max-width: 100%;
+  width: 100%;
+  > canvas {
+    width: 1578px !important;
+    height: 600px !important;
+  }
+  > table {
+    font-size: 11px;
+  }
+}
+.buttonStart {
+  width: 100%;
+  height: 50px;
+  cursor: pointer;
+  background-color: green;
+}
+.buttonStart:hover {
+  opacity: 0.8;
+}
