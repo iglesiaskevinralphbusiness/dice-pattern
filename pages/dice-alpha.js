@@ -40,7 +40,7 @@ const Dice = () => {
     "3b12d9d4e31e9b32843a12570134d3f7d7d7f697f03b209a2fd9e086bebcb2c2",
     "44493301b7c565ff14479f147af5e74087f1694c7bb851a5dd385f8b872d4c42", // 30
   ];
-  const [activeServerSeed, setActiveServerSeed] = useState(0);
+  const [activeServerSeed, setActiveServerSeed] = useState(2);
   const [server_seed, setServer_seed] = useState(server_seed_list[activeServerSeed]);
   const client_seed = "emoemoemoemo";
   const [payout, setPayout] = useState(3);
@@ -251,7 +251,7 @@ const Dice = () => {
     } else {
 
       //Analyze result here
-      const doNotDoThis = true;
+      let rule = false;
 
       // Under 49.50 / 2x
       if(results.length > 10){
@@ -261,6 +261,7 @@ const Dice = () => {
         for(let i=0; i<=9; i++){ // kung nakasampong over 49.50 na, malapit na lumabas ang under
           if(Number(resultsCopy[i].result) < 49.50){
             redFlag = true;
+            i = 100;
           }
         }
         if(!redFlag){
@@ -270,13 +271,14 @@ const Dice = () => {
         }
       }
       // Over 50.49 / 2x
-      if(results.length > 10){
+      if(results.length > 10 && rule == false){
         const resultsCopy = JSON.parse(JSON.stringify(results));
         resultsCopy.reverse();
         let redFlag = false;
         for(let i=0; i<=9; i++){ // kung nakasampong under 50.49 na, malapit na lumabas ang over
           if(Number(resultsCopy[i].result) > 50.49){
             redFlag = true;
+            i = 100;
           }
         }
         if(!redFlag){
@@ -286,13 +288,14 @@ const Dice = () => {
         }
       }
       // Under 33.00 / 3x
-      if(results.length > 15){
+      if(results.length > 15 && rule == false){
         const resultsCopy = JSON.parse(JSON.stringify(results));
         resultsCopy.reverse();
         let redFlag = false;
         for(let i=0; i<=14; i++){ // kung kinse over 33 na, malapit na lumabas ang under
           if(Number(resultsCopy[i].result) < 33){
             redFlag = true;
+            i = 100;
           }
         }
         if(!redFlag){
@@ -302,13 +305,14 @@ const Dice = () => {
         }
       }
       // Over 66.99 / 3x
-      if(results.length > 15){
+      if(results.length > 15 && rule == false){
         const resultsCopy = JSON.parse(JSON.stringify(results));
         resultsCopy.reverse();
         let redFlag = false;
         for(let i=0; i<=14; i++){ // kung kinse under 66.99 na, malapit na lumabas ang over
           if(Number(resultsCopy[i].result) > 66.99){
             redFlag = true;
+            i = 100;
           }
         }
         if(!redFlag){
