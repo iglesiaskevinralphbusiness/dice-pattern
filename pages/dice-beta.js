@@ -3,10 +3,14 @@ var CryptoJS = require("crypto-js");
 import LineChart from "./components/line-chart-1";
 
 const Dice = () => {
+  //temporary
+  const [byThree, setByThree] = useState(0);
+  const [myLossing, setMyLossing] = useState(0);
+  const [flag, setFlag] = useState(false);
 
   // editable
   const enableBalanceLimit = true;
-  const [balance, setBalance] = useState(0.00047);
+  const [balance, setBalance] = useState(0.00087);
   const server_seed_list = [
     "261b258294aff473a6b15b600355f48305fa5e42b5efeb0e8b4860f06be1f090",
     "edeac22fd0b9106bcd4434aaf98dc7928ecc1adc67836f225b89d86ab8fec28b",
@@ -40,16 +44,16 @@ const Dice = () => {
     "3b12d9d4e31e9b32843a12570134d3f7d7d7f697f03b209a2fd9e086bebcb2c2",
     "44493301b7c565ff14479f147af5e74087f1694c7bb851a5dd385f8b872d4c42", // 30
   ];
-  const [activeServerSeed, setActiveServerSeed] = useState(4);
+  const [activeServerSeed, setActiveServerSeed] = useState(1);
   const [server_seed, setServer_seed] = useState(server_seed_list[activeServerSeed]);
   const client_seed = "emoemoemoemo";
-  const [payout, setPayout] = useState(3);
-  const [chance, setChance] = useState(33);
+  const [payout, setPayout] = useState(2);
+  const [chance, setChance] = useState(49.5);
   const [roll, setRoll] = useState('over'); // under/over
   const maxNonce = 50000;
   const maxDataToShow = 60;
   const [nonce, setNonce] = useState(0);
-  const startingBetAmount = 0.00000000;
+  const startingBetAmount = 0.00000005;
 
   // fixed
   const [profit, setProfit] = useState(0);
@@ -63,8 +67,17 @@ const Dice = () => {
   const [winStreak, setWinStreak] = useState(0);
   const [maxLoseStreak, setMaxLoseStreak] = useState(0);
   const [maxWinStreak, setMaxWinStreak] = useState(0);
+  const [totalLose, setTotalLose] = useState(0);
+  const [totalWin, setTotalWin] = useState(0);
 
   const byPayout = [
+    {
+      payout: 1.9412,
+      loseStreak: 0,
+      winStreak: 0,
+      maxLoseStreak: 0,
+      maxWinStreak: 0
+    },
     {
       payout: 2,
       loseStreak: 0,
@@ -135,20 +148,22 @@ const Dice = () => {
       if(isStarted && nonce <= maxNonce){
         setBetHistory(lastResult);
       } else if(nonce > maxNonce){
-        if(profit < 0){
-          setBetHistory(lastResult);
-          console.log('Max nonce reach but profit is losing, will continue playing');
-        } else {
+        // if(profit < 0){
+        //   setBetHistory(lastResult);
+        //   console.log('Max nonce reach but profit is losing, will continue playing');
+        // } else {
           console.log('Max nonce reach');
 
 
           // move to next server seed
-          console.log('#' + activeServerSeed);
-          console.log('profit: ' + profit.toFixed(8));
-          console.log('max bet: ' + maxBetAmount.toFixed(8));
-          console.log('max lose: ' + maxLoseStreak);
-          console.log(maxStreakByPayout);
-          console.log('_____________________');
+          console.table({
+            activeServerSeed:activeServerSeed,
+            profit: profit.toFixed(8),
+            maxBet: maxBetAmount.toFixed(8),
+            maxLose: maxLoseStreak
+          });
+          // console.log(maxStreakByPayout);
+          // console.log('_____________________');
           if(activeServerSeed <= 30){
             const nextActiveServerSeed = activeServerSeed + 1;
             setActiveServerSeed(nextActiveServerSeed);
@@ -171,7 +186,7 @@ const Dice = () => {
               rollADice(true);
             }, 1000);
           }
-        }
+        // }
       }
     }
   }, [results]);
@@ -199,6 +214,7 @@ const Dice = () => {
     }
     // win and lose streak
     if(lastResult.win) {
+      setTotalWin(totalWin => totalWin + 1);
       const temp = winStreak + 1;
       setWinStreak(temp);
       setLoseStreak(0);
@@ -206,6 +222,7 @@ const Dice = () => {
         setMaxWinStreak(temp);
       }
     } else {
+      setTotalLose(totalLose => totalLose + 1);
       const temp = loseStreak + 1;
       setWinStreak(0);
       setLoseStreak(temp);
@@ -239,109 +256,33 @@ const Dice = () => {
   }
 
   const myRulesNextRoll = (lastResult) => {
-    // editable below here
     let continueBet = true;
+    // editable below here
+    
+    
+    
+    if(!lastResult.win){
+      const byThreeTemp = byThree + 1;
+      setByThree(byThreeTemp);
 
-    if(betAmount > 0){
-      if(lastResult.win){
-        setBetAmount(0.00000000);
-        if(Number(profit) <= 0){
-          continueBet = false;
+      if(byThreeTemp == 3){
+        setBetAmount(0.00000005);
+      }
+      else if(byThreeTemp >= 11){
+        if(!flag){
+          setFlag(true);
+          setBetAmount(0.00000045);
+        } else {
+          setBetAmount(betAmount => betAmount * 2);
         }
       } else {
-        if(payout == 2){
-          const newBetAmount = betAmount * 2;
-          setBetAmount(betAmount => newBetAmount);
-        } else if(payout == 3){
-          let newBetAmount = 0;
-          if(maxStreakByPayout[1].loseStreak <= 10){
-            newBetAmount = betAmount * 1.4;
-          } else if(maxStreakByPayout[1] <= 20){
-            newBetAmount = betAmount * 1.3;
-          } else if(maxStreakByPayout[1] <= 30){
-            newBetAmount = betAmount * 1.2;
-          } else {
-            newBetAmount = betAmount * 1.1;
-          }
-          
-          setBetAmount(betAmount => newBetAmount);
-        }
+        setBetAmount(0.00000000);
       }
     } else {
-
-      //Analyze result here
-
-      // Under 49.50 / 2x
-      if(results.length > 10){
-        const resultsCopy = JSON.parse(JSON.stringify(results));
-        resultsCopy.reverse();
-        let redFlag = false;
-        for(let i=0; i<=9; i++){ // kung nakasampong over 49.50 na, malapit na lumabas ang under
-          if(Number(resultsCopy[i].result) < 49.50){
-            redFlag = true;
-            break;
-          }
-        }
-        if(!redFlag){
-          setRoll('under');
-          setPayout(2);
-          setBetAmount(0.00000050);
-        }
-      }
-      // Over 50.49 / 2x
-      if(results.length > 10){
-        const resultsCopy = JSON.parse(JSON.stringify(results));
-        resultsCopy.reverse();
-        let redFlag = false;
-        for(let i=0; i<=9; i++){ // kung nakasampong under 50.49 na, malapit na lumabas ang over
-          if(Number(resultsCopy[i].result) > 50.49){
-            redFlag = true;
-            break;
-          }
-        }
-        if(!redFlag){
-          setRoll('over');
-          setPayout(2);
-          setBetAmount(0.00000050);
-        }
-      }
-      // Under 33.00 / 3x
-      if(results.length > 15){
-        const resultsCopy = JSON.parse(JSON.stringify(results));
-        resultsCopy.reverse();
-        let redFlag = false;
-        for(let i=0; i<=14; i++){ // kung kinse over 33 na, malapit na lumabas ang under
-          if(Number(resultsCopy[i].result) < 33){
-            redFlag = true;
-            break;
-          }
-        }
-        if(!redFlag){
-          setRoll('under');
-          setPayout(3);
-          setBetAmount(0.00000050);
-        }
-      }
-      // Over 66.99 / 3x
-      if(results.length > 15){
-        const resultsCopy = JSON.parse(JSON.stringify(results));
-        resultsCopy.reverse();
-        let redFlag = false;
-        for(let i=0; i<=14; i++){ // kung kinse under 66.99 na, malapit na lumabas ang over
-          if(Number(resultsCopy[i].result) > 66.99){
-            redFlag = true;
-            break;
-          }
-        }
-        if(!redFlag){
-          setRoll('over');
-          setPayout(3);
-          setBetAmount(0.00000050);
-        }
-      }
+      setByThree(0);
+      setBetAmount(0.00000000);
+      setFlag(false);
     }
-
-
     
 
     // editable above here
@@ -393,6 +334,18 @@ const Dice = () => {
             <td>{ maxBetAmount.toFixed(8) }</td>
             <td>Max Win Streak</td>
             <td>{ maxWinStreak }</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Total Lose</td>
+            <td>{ totalLose }</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Total Win</td>
+            <td>{ totalWin }</td>
           </tr>
         </tbody>
       </table>
